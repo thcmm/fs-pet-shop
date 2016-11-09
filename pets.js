@@ -11,50 +11,58 @@ var cmd = process.argv[2];
 var rx = new RegExp(/^\d+$/); // Setup regex check for whole number
 if (rx.test(process.argv[3])) { // Test index argument
     var db_index = process.argv[3]; // Assigne index if arg is good
-} else {helveta();} // burn
+} else {
+    // helveta();
+} // burn
 
 // Toggle debug messages : DEBUG true show | false mask
-var DEBUG = true;
+var DEBUG = false;
+
 function showDbg() {
-    if ( DEBUG ) {
+    if (DEBUG) {
         console.log.apply(this, arguments);
     }
-  }
+}
 
 showDbg("CMD entry: ", cmd);
 showDbg("Index val: ", db_index);
-showDbg("process = ", process.exit());
-
 
 switch (cmd) {
-  case 'read':
-    read(db_index); // Verify the only a Whole number is passed
-    break;
-  case 'create':
-      create();
-      break;
-  default:
-      helveta();
+    case "read":
+        read(); // Verify the only a Whole number is passed
+        break;
+    case "create":
+        create();
+        break;
+    default:
+        helveta();
 }
 
 function read() {
-      fs.readFile(dbPath, 'utf8', function(err, data) {
-          if (err) {
-              throw err;
-          }
-          var petsDB = JSON.parse(data);
-          showDbg("petsDB length: ", petsDB.length);
-          if (!db_index || db_index > petsDB.length) {console.log("Usage: node pets.js read INDEX");process.exit(1);}
-          if (db_index >= 0 && db_index < petsDB.length) {
-              console.log(petsDB[db_index]);
-          } else {
-              console.log(petsDB);
-          }
-      });
+    showDbg("f:read");
+    fs.readFile(dbPath, 'utf8', function(err, data) {
+        if (err) {
+            throw err;
+        }
+        var petsDB = JSON.parse(data);
+        showDbg("petsDB length: ", petsDB.length);
+        if (!db_index) {console.log(petsDB); return 0;}
+        getIndex(petsDB);
+    });
+}
+
+function getIndex(petsDB) {
+    showDbg("f:getIndex");
+    if (!db_index || db_index > petsDB.length) {console.log("Usage: node pets.js read INDEX");process.exit(1);}
+    if (db_index >= 0 && db_index < petsDB.length) {
+        console.log(petsDB[db_index]);
+    } else {
+        console.log(petsDB);
+    }
 }
 
 function create() {
-
+    showDbg("f:create");
 }
 
 function helveta() {
