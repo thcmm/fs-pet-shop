@@ -14,7 +14,7 @@ if (rx.test(process.argv[3])) { // Test index argument
 } else {helveta();} // burn
 
 // Toggle debug messages : DEBUG true show | false mask
-var DEBUG = false;
+var DEBUG = true;
 function showDbg() {
     if ( DEBUG ) {
         console.log.apply(this, arguments);
@@ -23,6 +23,8 @@ function showDbg() {
 
 showDbg("CMD entry: ", cmd);
 showDbg("Index val: ", db_index);
+showDbg("process = ", process.exit());
+
 
 if (cmd === 'read') {
     fs.readFile(dbPath, 'utf8', function(err, data) {
