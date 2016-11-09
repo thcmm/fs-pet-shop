@@ -26,22 +26,35 @@ showDbg("Index val: ", db_index);
 showDbg("process = ", process.exit());
 
 
-if (cmd === 'read') {
-    fs.readFile(dbPath, 'utf8', function(err, data) {
-        if (err) {
-            throw err;
-        }
-        var petsDB = JSON.parse(data);
-        showDbg("petsDB length: ", petsDB.length);
-        if (!db_index || db_index > petsDB.length) {console.log("Usage: node pets.js read INDEX");process.exit(1);}
-        if (db_index >= 0 && db_index < petsDB.length) {
-            console.log(petsDB[db_index]);
-        } else {
-            console.log(petsDB);
-        }
-    });
-} else {
-    helveta();
+switch (cmd) {
+  case 'read':
+    read(db_index); // Verify the only a Whole number is passed
+    break;
+  case 'create':
+      create();
+      break;
+  default:
+      helveta();
+}
+
+function read() {
+      fs.readFile(dbPath, 'utf8', function(err, data) {
+          if (err) {
+              throw err;
+          }
+          var petsDB = JSON.parse(data);
+          showDbg("petsDB length: ", petsDB.length);
+          if (!db_index || db_index > petsDB.length) {console.log("Usage: node pets.js read INDEX");process.exit(1);}
+          if (db_index >= 0 && db_index < petsDB.length) {
+              console.log(petsDB[db_index]);
+          } else {
+              console.log(petsDB);
+          }
+      });
+}
+
+function create() {
+
 }
 
 function helveta() {
