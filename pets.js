@@ -10,19 +10,16 @@ var file = path.basename(process.argv[1]);
 
 var cmdArgs = process.argv.slice(2);
 var createStrArgs = process.argv.slice(4, process.argv.length);
-console.log(createStrArgs);
-console.log("5:", process.argv[5]);
 
+var init_dB = false;
 // Operational vars [0:read | 1:create]
 var fileMode = null;
 // Flag to process create operation or not
 var createFlag = false;
-
-var cmd = process.argv[2];
-
+// Pets dB
+var petsDB = [];
 // Read vars
 var db_readIndex = null;
-
 // Create vars
 var db_writeIndex = null;
 var age = 0;
@@ -42,17 +39,16 @@ function checkArgv() {
     showDbg("f:checkArgv");
     switch (cmdArgs[0]) {
         case 'read':
-            fileMode = 0;
+            fileMode = 0; // not using yet
             db_readIndex = checkIndexNumber();
             read();
             break;
         case 'create':
             showDbg("f:checkArgv:create");
-            fileMode = 1;
-            age = checkIndexNumber();
-            showDbg("age: ", age);
+            fileMode = 1; // not using yet
+            age = Number(checkIndexNumber()); // cast to int
             checkStringInput();
-            // create();
+            create();
             break;
         default:
             console.log('WFT!');
@@ -76,126 +72,167 @@ function checkStringInput() { // Fix this dirty JUNK!
     } else if (typeof process.argv[5] == 'undefined') {
         createError();
     } else {
-      kind = process.argv[4];
-      name = process.argv[5];
+        kind = process.argv[4];
+        name = process.argv[5];
     }
-  }
+}
 
-    checkArgv();
-
-    function read() {
-        showDbg("f:read");
-        fs.readFile(dbPath, 'utf8', function(err, data) {
-            if (err) {
-                throw err;
-            }
-            var petsDB = JSON.parse(data);
-            showDbg("petsDB length: ", petsDB.length);
-            if (!db_readIndex) {
-                console.log(petsDB);
-                return 0;
-            }
-            getIndex(petsDB);
-            /*if (createFlat == true) {
-                create(petsDB);
-            } */
-        });
-    }
-
-    function getIndex(petsDB) {
-        showDbg("f:getIndex");
-        if (!db_readIndex || db_readIndex > petsDB.length) {
-            console.log("Usage: node pets.js read INDEX");
-            process.exit(1);
+function openDb() {
+    showDbg("f:open");
+    fs.readFile(dbPath, 'utf8', function(err, data) {
+        if (err) {
+            throw err;
         }
-        if (db_readIndex >= 0 && db_readIndex < petsDB.length) {
-            console.log(petsDB[db_readIndex]);
-        } else {
-            console.log(petsDB);
+        petsDB = JSON.parse(data);
+        showDbg(petsDB);
+    });
+}
+
+/*
+function read() {
+    showDbg("f:read");
+    fs.readFile(dbPath, 'utf8', function(err, data) {
+        if (err) {
+            throw err;
         }
-    }
+        // var petsDB = JSON.parse(data);
+        //  petsDB = JSON.parse(data);
+        showDbg("petsDB length: ", petsDB.length);
+        if (!db_readIndex) {
+            showDbg(petsDB);
+            return petsDB;
+        }
+        getIndex(petsDB);
+        //if (createFlag == true) {
+        //    create(petsDB);
+        //}
+    });
+}
+*/
 
-    function create(age, kind, name) {
-        showDbg("f:create");
-        showDbg("age: " + age + " kind: " + kind + " name: " + name);
-        createFlag = false; // set on exit function
+function read() {
+    showDbg("f:read");
+    showDbg("petsDB length: ", petsDB.length);
+    if (!db_readIndex) {
+        showDbg(petsDB);
+        return petsDB;
     }
+    //getIndex(petsDB);
+    getIndex();
+}
 
-    function helveta() {
-        console.error("Usage: node pets.js [read | create | update | destroy]");
+function getIndex() { /* removed petsDB argument */
+    showDbg("f:getIndex");
+    if (!db_readIndex || db_readIndex > petsDB.length) {
+        console.log("Usage: node pets.js read INDEX");
         process.exit(1);
     }
-
-    function createError() {
-        console.log("Usage: node pets.js create AGE KIND NAME");
+    if (db_readIndex >= 0 && db_readIndex < petsDB.length) {
+        console.log(petsDB[db_readIndex]);
+    } else {
+        console.log(petsDB);
     }
+}
+
+function create() {
+    showDbg("f:create");
+    showDbg("age: " + age + " kind: " + kind + " name: " + name);
+    var tempObj = {
+        age: age,
+        kind: kind,
+        name: name
+    };
+
+    showDbg("tempObj: ", tempObj);
+    petsDB.push(tempObj);
+    showDbg("petsDB: ", petsDB);
+    createFlag = false; // set on exit function
+
+}
+
+function helveta() {
+    console.error("Usage: node pets.js [read | create | update | destroy]");
+    process.exit(1);
+}
+
+function createError() {
+    console.log("Usage: node pets.js create AGE KIND NAME");
+}
+
+// Open file and populate petsDB once
+if (!init_dB) {
+    openDb();
+    init_dB = true;
+}
+// checkArgv();
 
 
 
-        /*
-        switch (cmd) {
-            case "read":
-                read(); // Verify the only a Whole number is passed
-                break;
-            case "create":
-                // check create vars
-                createFlag = true;
-                age = db_readIndex;
-                kind = path.basename(process.argv[1]);
-                name = path.basename(process.argv[2]);
-                create(age, kind, name);
-                break;
-            default:
-                helveta();
-        }
-        */
+
+/*
+switch (cmd) {
+    case "read":
+        read(); // Verify the only a Whole number is passed
+        break;
+    case "create":
+        // check create vars
+        createFlag = true;
+        age = db_readIndex;
+        kind = path.basename(process.argv[1]);
+        name = path.basename(process.argv[2]);
+        create(age, kind, name);
+        break;
+    default:
+        helveta();
+}
+*/
 
 
 
 
-    /*
-    --------------------------------------------------------------------------------
-    Fourth task:
-    - Application must also handle the create subcommand.
-    - Only when given an age, kind, and name will it create a record in the database.
-    - Remember to convert the age into an integer. For example:
+/*
+--------------------------------------------------------------------------------
+Fourth task:
+- Application must also handle the create subcommand.
+- Only when given an age, kind, and name will it create a record in the database.
+- Remember to convert the age into an integer. For example:
 
-    $ node pets.js create
-    Usage: node pets.js create AGE KIND NAME
+$ node pets.js create
+Usage: node pets.js create AGE KIND NAME
 
-    $ node pets.js create 3
-    Usage: node pets.js create AGE KIND NAME
+$ node pets.js create 3
+Usage: node pets.js create AGE KIND NAME
 
-    $ node pets.js create 3 parakeet
-    Usage: node pets.js create AGE KIND NAME
+$ node pets.js create 3 parakeet
+Usage: node pets.js create AGE KIND NAME
 
-    $ node pets.js create 3 parakeet Cornflake
-    { age: 3, kind: 'parakeet', name: 'Cornflake' }
+$ node pets.js create 3 parakeet Cornflake
+{ age: 3, kind: 'parakeet', name: 'Cornflake' }
 
-    $ node pets.js read 2
-    { age: 3, kind: 'parakeet', name: 'Cornflake' }
-    --------------------------------------------------------------------------------
-    Third task:
-    --------------------------------------------------------------------------------
-    - Application must handle the read subcommand when given an index.
-    - Read the pets.json file, parse its data to a native JavaScript object, access the correct record, and log it to the console.
-    - If the call to the filesystem fails for any reason, it should throw the resulting error.
-    --------------------------------------------------------------------------------
-    Second task:
-    --------------------------------------------------------------------------------
-    - Refactor the application to handle the read subcommand via the process arguments
-    - Read the pets.json file
-    - Parse its data to a native JavaScript object
-    - Log it to the console.
-    - If the call to the filesystem fails for any reason, it should throw the resulting error.
-    --------------------------------------------------------------------------------
-    First task:
-    --------------------------------------------------------------------------------
-    - Build a command-line application that displays its usage, ideally to the standard error channel, when invoked without a subcommand.
+$ node pets.js read 2
+{ age: 3, kind: 'parakeet', name: 'Cornflake' }
+--------------------------------------------------------------------------------
+Third task:
+--------------------------------------------------------------------------------
+- Application must handle the read subcommand when given an index.
+- Read the pets.json file, parse its data to a native JavaScript object, access the correct record, and log it to the console.
+- If the call to the filesystem fails for any reason, it should throw the resulting error.
+--------------------------------------------------------------------------------
+Second task:
+--------------------------------------------------------------------------------
+- Refactor the application to handle the read subcommand via the process arguments
+- Read the pets.json file
+- Parse its data to a native JavaScript object
+- Log it to the console.
+- If the call to the filesystem fails for any reason, it should throw the resulting error.
+--------------------------------------------------------------------------------
+First task:
+--------------------------------------------------------------------------------
+- Build a command-line application that displays its usage, ideally to the standard error channel, when invoked without a subcommand.
 
-    -The app should exit the process with a non-zero exit code to indicate that it failed to complete any work.
+-The app should exit the process with a non-zero exit code to indicate that it failed to complete any work.
 
-    Ex...
-    $ node pets.js
-    Usage: node pets.js [read | create | update | destroy]
-    */
+Ex...
+$ node pets.js
+Usage: node pets.js [read | create | update | destroy]
+*/
