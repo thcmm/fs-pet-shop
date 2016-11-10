@@ -10,7 +10,7 @@ var file = path.basename(process.argv[1]);
 
 var cmdArgs = process.argv.slice(2);
 var createStrArgs = process.argv.slice(4, process.argv.length);
-
+// Open dB and populate petsDB
 var init_dB = false;
 // Operational vars [0:read | 1:create]
 var fileMode = null;
@@ -41,6 +41,7 @@ function checkArgv() {
         case 'read':
             fileMode = 0; // not using yet
             db_readIndex = checkIndexNumber();
+            showDbg("db_readIndex: ", db_readIndex);
             read();
             break;
         case 'create':
@@ -78,37 +79,16 @@ function checkStringInput() { // Fix this dirty JUNK!
 }
 
 function openDb() {
-    showDbg("f:open");
+    showDbg("f:openDb");
     fs.readFile(dbPath, 'utf8', function(err, data) {
         if (err) {
             throw err;
         }
         petsDB = JSON.parse(data);
-        showDbg(petsDB);
+        showDbg("petsDB: ", petsDB);
     });
 }
 
-/*
-function read() {
-    showDbg("f:read");
-    fs.readFile(dbPath, 'utf8', function(err, data) {
-        if (err) {
-            throw err;
-        }
-        // var petsDB = JSON.parse(data);
-        //  petsDB = JSON.parse(data);
-        showDbg("petsDB length: ", petsDB.length);
-        if (!db_readIndex) {
-            showDbg(petsDB);
-            return petsDB;
-        }
-        getIndex(petsDB);
-        //if (createFlag == true) {
-        //    create(petsDB);
-        //}
-    });
-}
-*/
 
 function read() {
     showDbg("f:read");
@@ -145,7 +125,8 @@ function create() {
 
     showDbg("tempObj: ", tempObj);
     petsDB.push(tempObj);
-    showDbg("petsDB: ", petsDB);
+    var db_update_JSON = JSON.stringify(petsDB);
+    showDbg("db_update_JSON: ", db_update_JSON);
     createFlag = false; // set on exit function
 
 }
@@ -160,13 +141,35 @@ function createError() {
 }
 
 // Open file and populate petsDB once
-if (!init_dB) {
+if (init_dB === false) {
     openDb();
     init_dB = true;
 }
-// checkArgv();
+
+checkArgv();
 
 
+/*
+function read() {
+    showDbg("f:read");
+    fs.readFile(dbPath, 'utf8', function(err, data) {
+        if (err) {
+            throw err;
+        }
+        // var petsDB = JSON.parse(data);
+        //  petsDB = JSON.parse(data);
+        showDbg("petsDB length: ", petsDB.length);
+        if (!db_readIndex) {
+            showDbg(petsDB);
+            return petsDB;
+        }
+        getIndex(petsDB);
+        //if (createFlag == true) {
+        //    create(petsDB);
+        //}
+    });
+}
+*/
 
 
 /*
